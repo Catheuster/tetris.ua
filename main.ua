@@ -23,9 +23,9 @@ Init ← State~New CreatePiece ▽20¤▽10 0 0 0
   WithPieces ↚ /↥∊:⍉+⊃(Piece~Coords|⍉⊚±Piece~Map|⊚±⋅State~Board)
   WithWalls  ↚ /↥⊂∩♭⊃(<0_0|>19_9)+⊃(Piece~Coords|⍉⊚±Piece~Map)
   Colision   ← ↥⊃WithWalls WithPieces⊸State~ActivePiece
-  Try! ← (
+  Try‼ ← (
     ⊸(Colision ⍜State~ActivePiece ^0)
-    ⨬(⍜State~ActivePiece ^0|∘)
+    ⨬(⍜State~ActivePiece ^0|^1)
   )
 └─╴
 
@@ -35,20 +35,17 @@ Init ← State~New CreatePiece ▽20¤▽10 0 0 0
 └─╴
 
 ┌─╴Movement
-  Rotate⌟  ← Colision~Try!⍜Piece~Map (⍉⇌)
-  Rotate⌞  ← Colision~Try!⍜Piece~Map (⇌⍉)
-  Right    ← Colision~Try!⍜Piece~Coords (+ 0_1)
-  Left     ← Colision~Try!⍜Piece~Coords (- 0_1)
-  SoftDrop ← Colision~Try!⍜Piece~Coords (+ 1_0)
+  Rotate⌟  ← Colision~Try‼⍜Piece~Map(⍉⇌) ∘
+  Rotate⌞  ← Colision~Try‼⍜Piece~Map(⇌⍉) ∘
+  Right    ← Colision~Try‼⍜Piece~Coords(+ 0_1) ∘
+  Left     ← Colision~Try‼⍜Piece~Coords(- 0_1) ∘
+  SoftDrop ← Colision~Try‼⍜Piece~Coords(+ 1_0) ∘
   Fix ↚ (
     ⍜State~Board(⋅∘)⟜Draw~CombineMap # Fix Piece
     ⍜State~ActivePiece(CreatePiece◌) # Spawn New Piece
     ⍜State~Board(⍜⇌⬚0↙₂₀▽¬±⊸≡/↧)     # Remove Completed Lines
   )
-  GDrop ↚ (
-    ⊸(Colision~Colision⍜State~ActivePiece⍜Piece~Coords (+1_0)) # Test Colision
-    ⨬(⍜State~ActivePiece⍜Piece~Coords (+1_0)|Fix)
-  )
+  GDrop ↚ Colision~Try‼⍜Piece~Coords(+1_0) Fix
   Gravity ← (
     ⊸(≥ 10 State~FrameCounter)       # Test Frame
     ⨬(∘|GDrop ⍜State~FrameCounter×₀) # Drop
