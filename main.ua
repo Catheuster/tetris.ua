@@ -3,7 +3,7 @@ I ~ "git: github.com/Marcos-cat/iris"
 I~Open 700_900 "Tetra Block"
 
 ~Piece {Map Coords}
-~State {ActivePiece Board Score FrameCounter}
+~State {ActivePiece Board Score FrameCounter PieceTexture BgTexture}
 CreatePiece ← (
   0_3
   ×+₁⟜⨬(
@@ -17,7 +17,15 @@ CreatePiece ← (
   )⚂₇
   Piece~New
 )
-Init ← State~New CreatePiece ▽20¤▽10 0 0 0
+
+Init ← State~New (
+  I~Draw~Texture~Load "bg.png"    # BgTexture
+  I~Draw~Texture~Load "piece.png" # PieceTexture
+  0                               # FrameCounter
+  0                               # Score
+  ▽20¤▽10 0                       # Board
+  CreatePiece                     # ActivePiece
+)
 
 ┌─╴Colision
   WithPieces ↚ /↥∊:⍉+⊃(Piece~Coords|⍉⊚±Piece~Map|⊚±⋅State~Board)
@@ -31,7 +39,10 @@ Init ← State~New CreatePiece ▽20¤▽10 0 0 0
 
 ┌─╴Draw
   CombineMap ← ↥↻¯⊃(⊃(Piece~Coords|⬚0↙20_10 Piece~Map) State~ActivePiece|State~Board)
-  DrawMap    ← ≡(I~Draw~Square) ¤Blue 26 ⍉⇌+202×30⍉⊚±CombineMap
+  DrawBgTile ← I~Draw~Texture~Map ⊙⊙(0_0 0 State~BgTexture)
+  DrawBg     ← ≡DrawBgTile¤[0_0 30_30] ≡(⊟:30_30)+200×30/⊂⇡10_20¤
+  DrawBlock  ← I~Draw~Texture~Map ⊙⊙(0_0 0 State~PieceTexture)
+  DrawMap    ← ≡DrawBlock≡(⊟:30_30)≡×[30_0]⊃(⊡|≡(⊟:30_30)+200×30≡⇌)⊚⊸±⊃CombineMap¤
 └─╴
 
 ┌─╴Movement
@@ -53,17 +64,22 @@ Init ← State~New CreatePiece ▽20¤▽10 0 0 0
 └─╴
 
 Init
-# Start the game loop
+# Draw~DrawMap
+
+# Start the game loo
 °I~Screen~FPS 20
 I~Loop!(
-  # Draw the background blue
+  # Draw~DrawBlock [180_0 30_30] [100_100 30_30]
+  # ⊸(I~Draw~Texture~Map [0_0 30_30] [0_0 30_30] 0_0 0 State~PieceTexture)
+  # # Draw the background blue
   I~Draw~Background Black
   I~Draw~Rect White 306_606 197_197
   I~Draw~Rect Black 300_600 200_200
+  ⟜Draw~DrawBg
   ⟜Draw~DrawMap
   ⍜State~FrameCounter (+1)
   Movement~Gravity
-  #   I~Draw~Text Red 10 50_50 ⊸(°⋕State~FrameCounter)
+  # #   I~Draw~Text Red 10 50_50 ⊸(°⋕State~FrameCounter)
   I~Key~Down‼@a Movement~Left
   I~Key~Down‼@d Movement~Right
   I~Key~Pressed‼@. Movement~Rotate⌟
